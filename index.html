@@ -1,0 +1,42 @@
+s"></div>
+
+  <script>
+    const birthdayMonth = 10; // October
+    const birthdayDay = 2;
+
+    function updateDaysSinceBirthday() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      let birthdayThisYear = new Date(currentYear, birthdayMonth - 1, birthdayDay);
+
+      if (today < birthdayThisYear) {
+        birthdayThisYear = new Date(currentYear - 1, birthdayMonth - 1, birthdayDay);
+      }
+
+      const diffTime = today - birthdayThisYear;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      document.getElementById("days").textContent = diffDays;
+    }
+
+    updateDaysSinceBirthday();
+
+    function scheduleMidnightUpdate() {
+      const now = new Date();
+      const nextMidnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0, 0, 1
+      );
+      const msUntilMidnight = nextMidnight - now;
+
+      setTimeout(() => {
+        updateDaysSinceBirthday();
+        scheduleMidnightUpdate();
+      }, msUntilMidnight);
+    }
+
+    scheduleMidnightUpdate();
+  </script>
+</body>
+</html>
