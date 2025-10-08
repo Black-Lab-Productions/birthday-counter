@@ -26,48 +26,75 @@
       font-weight: bold;
       text-align: center;
     }
+    #quote {
+      font-size: 5vw;
+      color: #555;
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      padding: 0 5vw;
+    }
   </style>
 </head>
 <body>
-  <div id="days"></div>
+<div id="days"></div>
+<div id="quote"></div>   <!-- 👈 This will hold the random quote -->
 
-  <script>
-    const birthdayMonth = 10; // October
-    const birthdayDay = 1;
+ <script>
+  const birthdayMonth = 10; // October
+  const birthdayDay = 2;
 
-    function updateDaysSinceBirthday() {
-      const today = new Date();
-      const currentYear = today.getFullYear();
-      let birthdayThisYear = new Date(currentYear, birthdayMonth - 1, birthdayDay);
+  function updateDaysSinceBirthday() {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    let birthdayThisYear = new Date(currentYear, birthdayMonth - 1, birthdayDay);
 
-      if (today < birthdayThisYear) {
-        birthdayThisYear = new Date(currentYear - 1, birthdayMonth - 1, birthdayDay);
-      }
-
-      const diffTime = today - birthdayThisYear;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      document.getElementById("days").textContent = diffDays;
+    if (today < birthdayThisYear) {
+      birthdayThisYear = new Date(currentYear - 1, birthdayMonth - 1, birthdayDay);
     }
 
+    const diffTime = today - birthdayThisYear;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // 🎂 Day 1 = birthday
+    document.getElementById("days").textContent = diffDays;
+  }
+
+  // ✨ Fetch a random motivational quote from ZenQuotes
+  async function showRandomQuote() {
+    try {
+      const res = await fetch("https://zenquotes.io/api/random");
+      const data = await res.json();
+      document.getElementById("quote").textContent = `"${data[0].q}" — ${data[0].a}`;
+    } catch {
+      document.getElementById("quote").textContent = "Keep going. You're doing great.";
+    }
+  }
+
+  // ⏱️ Update both number and quote
+  function updateAll() {
     updateDaysSinceBirthday();
+    showRandomQuote();
+  }
 
-    function scheduleMidnightUpdate() {
-      const now = new Date();
-      const nextMidnight = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 2,
-        0, 0, 1
-      );
-      const msUntilMidnight = nextMidnight - now;
+  updateAll(); // initial load
 
-      setTimeout(() => {
-        updateDaysSinceBirthday();
-        scheduleMidnightUpdate();
-      }, msUntilMidnight);
-    }
+  // 🔁 Schedule update just after midnight every day
+  function scheduleMidnightUpdate() {
+    const now = new Date();
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0, 0, 1
+    );
+    const msUntilMidnight = nextMidnight - now;
 
-    scheduleMidnightUpdate();
-  </script>
+    setTimeout(() => {
+      updateAll();
+      scheduleMidnightUpdate(); // schedule next day's update
+    }, msUntilMidnight);
+  }
+
+  scheduleMidnightUpdate();
+</script>
 </body>
 </html>
