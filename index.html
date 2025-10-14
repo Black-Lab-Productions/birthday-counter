@@ -15,13 +15,6 @@
       font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     }
 
-    #container {
-      display: flex;
-      flex-direction: column; /* stack number and quote vertically */
-      align-items: center;
-      justify-content: center;
-    }
-
     #days {
       font-size: 40vw;
       color: green;
@@ -29,23 +22,10 @@
       text-align: center;
       line-height: 1;
     }
-
-    #quote {
-      font-size: 5vw;
-      color: #555;
-      text-align: center;
-      margin-top: 20px;
-      font-style: italic;
-      padding: 0 5vw;
-      max-width: 90vw;
-    }
   </style>
 </head>
 <body>
-  <div id="container">
-    <div id="days"></div>
-    <div id="quote"></div>
-  </div>
+  <div id="days"></div>
 
   <script>
     // 👇 Read birthday from URL parameter (format: ?bday=MM-DD)
@@ -71,27 +51,17 @@
       }
 
       const diffTime = today - birthdayThisYear;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // birthday = Day 1
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // 🎂 Day 1 = birthday
       document.getElementById("days").textContent = diffDays;
-    }
-
-    async function showRandomQuote() {
-      try {
-        const res = await fetch("https://zenquotes.io/api/random");
-        const data = await res.json();
-        document.getElementById("quote").textContent = `"${data[0].q}" — ${data[0].a}`;
-      } catch {
-        document.getElementById("quote").textContent = "Keep going. You're doing great.";
-      }
     }
 
     function updateAll() {
       updateDaysSinceBirthday();
-      showRandomQuote();
     }
 
     updateAll();
 
+    // 🔁 Update just after midnight every day
     function scheduleMidnightUpdate() {
       const now = new Date();
       const nextMidnight = new Date(
