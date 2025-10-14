@@ -2,14 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Days Since Birthday</title>
-
-  <!-- 📲 Make it behave like an app when added to Home Screen -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Days Since Birthday">
-
   <style>
     body {
       background-color: #f9fff9;
@@ -20,12 +14,22 @@
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     }
+
+    #container {
+      display: flex;
+      flex-direction: column; /* stack number and quote vertically */
+      align-items: center;
+      justify-content: center;
+    }
+
     #days {
-      font-size: 50vw;
+      font-size: 40vw;
       color: green;
       font-weight: bold;
       text-align: center;
+      line-height: 1;
     }
+
     #quote {
       font-size: 5vw;
       color: #555;
@@ -33,57 +37,78 @@
       margin-top: 20px;
       font-style: italic;
       padding: 0 5vw;
+      max-width: 90vw;
     }
   </style>
 </head>
 <body>
-<div id="days"></div>
-<div id="quote"></div>   <!-- 👈 This will hold the random quote -->
+  <div id="container">
+    <div id="days"></div>
+    <div id="quote"></div>
+  </div>
 
- <script>
-  const birthdayMonth = 10; // October
-  const birthdayDay = 2;
-
-  function updateDaysSinceBirthday() {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    let birthdayThisYear = new Date(currentYear, birthdayMonth - 1, birthdayDay);
-
-    if (today < birthdayThisYear) {
-      birthdayThisYear = new Date(currentYear - 1, birthdayMonth - 1, birthdayDay);
+  <script>
+    // 👇 Read birthday from URL parameter (format: ?bday=MM-DD)
+    const urlParams = new URLSearchParams(window.location.search);
+    const bdayParam = urlParams.get("bday");
+    let birthdayMonth = 10; // default = October
+    let birthdayDay = 2;    // default = 2nd
+    if (bdayParam) {
+      const parts = bdayParam.split("-");
+      if (parts.length === 2) {
+        birthdayMonth = Number(parts[0]);
+        birthdayDay = Number(parts[1]);
+      }
     }
 
-    const diffTime = today - birthdayThisYear;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // 🎂 Day 1 = birthday
-    document.getElementById("days").textContent = diffDays;
-  }
+    function updateDaysSinceBirthday() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      let birthdayThisYear = new Date(currentYear, birthdayMonth - 1, birthdayDay);
 
-  // ⏱️ Update both number and quote
-  function updateAll() {
-    updateDaysSinceBirthday();
-    showRandomQuote();
-  }
+      if (today < birthdayThisYear) {
+        birthdayThisYear = new Date(currentYear - 1, birthdayMonth - 1, birthdayDay);
+      }
 
-  updateAll(); // initial load
+      const diffTime = today - birthdayThisYear;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // birthday = Day 1
+      document.getElementById("days").textContent = diffDays;
+    }
 
-  // 🔁 Schedule update just after midnight every day
-  function scheduleMidnightUpdate() {
-    const now = new Date();
-    const nextMidnight = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1,
-      0, 0, 1
-    );
-    const msUntilMidnight = nextMidnight - now;
+    async function showRandomQuote() {
+      try {
+        const res = await fetch("https://zenquotes.io/api/random");
+        const data = await res.json();
+        document.getElementById("quote").textContent = `"${data[0].q}" — ${data[0].a}`;
+      } catch {
+        document.getElementById("quote").textContent = "Keep going. You're doing great.";
+      }
+    }
 
-    setTimeout(() => {
-      updateAll();
-      scheduleMidnightUpdate(); // schedule next day's update
-    }, msUntilMidnight);
-  }
+    function updateAll() {
+      updateDaysSinceBirthday();
+      showRandomQuote();
+    }
 
-  scheduleMidnightUpdate();
-</script>
+    updateAll();
+
+    function scheduleMidnightUpdate() {
+      const now = new Date();
+      const nextMidnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0, 0, 1
+      );
+      const msUntilMidnight = nextMidnight - now;
+
+      setTimeout(() => {
+        updateAll();
+        scheduleMidnightUpdate();
+      }, msUntilMidnight);
+    }
+
+    scheduleMidnightUpdate();
+  </script>
 </body>
 </html>
