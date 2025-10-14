@@ -58,17 +58,6 @@
     document.getElementById("days").textContent = diffDays;
   }
 
-  // ✨ Fetch a random motivational quote from ZenQuotes
-  async function showRandomQuote() {
-    try {
-      const res = await fetch("https://zenquotes.io/api/random");
-      const data = await res.json();
-      document.getElementById("quote").textContent = `"${data[0].q}" — ${data[0].a}`;
-    } catch {
-      document.getElementById("quote").textContent = "Keep going. You're doing great.";
-    }
-  }
-
   // ⏱️ Update both number and quote
   function updateAll() {
     updateDaysSinceBirthday();
